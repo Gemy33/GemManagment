@@ -1,0 +1,177 @@
+﻿@model IEnumerable<MemberViewModel>
+
+@if (TempData["Success"] is not null)
+{
+    <div id="Alert" class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        Member Created Successfully
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] is not null)
+{
+    <div id="Alert" class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Member Failed To Create
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="container">
+    <header class="d-flex justify-content-between align-items-center mt-5 mb-2">
+        <!-- Search -->
+        <form asp-controller="Member" asp-action="Index" method="get" class="position-relative" style="max-width: 350px; width: 100%;">
+            <i class="bi bi-search position-absolute" style="top: 50%; left: 15px; transform: translateY(-50%); color: #6c757d;"></i>
+            <input type="text" name="search" id="clientSearch" value="@Context.Request.Query["search"]"
+                   class="form-control rounded-pill ps-5 shadow-sm"
+                   placeholder="Search by name, email or phone..." />
+        </form>
+
+        <!-- Add Member Button -->
+        <a href="\Member\Create" class="btn btn-fill fw-medium rounded-pill px-3 py-3">
+            + Add Member
+        </a>
+    </header>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-person-workspace display-1 text-muted"></i>
+            <h4 class="mt-3 text-muted">No Members Available</h4>
+            <p class="text-muted">Add your first Member to get started</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive" style="overflow: visible;">
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Gender</th>
+                        <th>Phone</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var member in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="avatar">
+                                    <img src="~/images/member/@member.Photo"
+                                         class="rounded-circle"
+                                         style="width: 40px; height: 40px;" />
+                                </span>
+                            </td>
+                            <td>@member.Name</td>
+                            <td>@member.Email</td>
+                            <td>@member.Gender</td>
+                            <td>@member.Phone</td>
+                            <td class="action position-relative">
+                                <div class="dropdown">
+                                    <button class="btn btn-link p-0 border-0"
+                                            type="button"
+                                            id="dropdownMenuButton-@member.Id"
+                                            data-bs-toggle="dropdown">
+                                        <img src="~/images/action dots.jpg" />
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-start">
+                                        <li>
+                                            <a asp-controller="Member"
+                                               asp-action="GetMemberDetails"
+                                               asp-route-id="@member.Id"
+                                               class="dropdown-item">
+                                                View Member Data
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a asp-controller="Member"
+                                               asp-action="HealtheRecordDetails"
+                                               asp-route-id="@member.Id"
+                                               class="dropdown-item">
+                                                View Health Record Data
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li>
+                                            <a asp-controller="Member"
+                                               asp-action="Edit"
+                                               asp-route-id="@member.Id"
+                                               class="dropdown-item">
+                                                Edit Member Data
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li>
+                                            <a asp-controller="Member"
+                                               asp-action="Delete"
+                                               asp-route-id="@member.Id"
+                                               class="dropdown-item text-danger">
+                                                Delete
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <!-- Pagination -->
+        <nav class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted small">Page @ViewBag.CurrentPage of @ViewBag.TotalPages</div>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link rounded-circle" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage - 1)" asp-route-search="@ViewBag.Search">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link rounded-circle" asp-action="Index" asp-route-page="@i" asp-route-search="@ViewBag.Search">@i</a>
+                    </li>
+                }
+                <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                    <a class="page-link rounded-circle" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)" asp-route-search="@ViewBag.Search">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+             const searchInput = document.getElementById("clientSearch");
+        const tableRows = document.querySelectorAll("table tbody tr");
+        if (searchInput) {
+            searchInput.addEventListener("keyup", function () {
+                const value = this.value.toLowerCase();
+                tableRows.forEach(row => {
+                    const name = row.children[1].innerText.toLowerCase();
+                    const email = row.children[2].innerText.toLowerCase();
+                    const phone = row.children[4].innerText.toLowerCase();
+                    row.style.display = (name.includes(value) || email.includes(value) || phone.includes(value)) ? "" : "none";
+                });
+            });
+            } 
+            const alertBox = document.getElementById("Alert");
+            if (alertBox) {
+                setTimeout(() => {
+                    alertBox.style.transition = "opacity 0.5s ease";
+                    alertBox.style.opacity = "0";
+                    setTimeout(() => alertBox.remove(), 500);
+                }, 1500);
+            }
+        })
+       
+    </script>
+}

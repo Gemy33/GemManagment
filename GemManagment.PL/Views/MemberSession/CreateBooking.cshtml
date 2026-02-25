@@ -1,0 +1,73 @@
+﻿@using GymManagment.BLL.ViewModels.MemberSessionViewModels
+@model CreateBookingViewModel
+<h1>Create New Booking</h1>
+<hr />
+<div class="row">
+    <div class="d-flex justify-content-center align-items-center h-100">
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Booking Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="Create">
+                        <div class="mb-3">
+                            <input type="number" hidden readonly asp-for="sessionId" value="@Model.sessionId" />
+                            <label class="form-label">Phone</label>
+                            <input asp-for="Phone" type="text" class="form-control mb-2" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+
+                            <label class="form-label text-dark d-block">Member</label>
+                            @* <select name="memberId" class="form-select pt-1">
+                                <option value="">-- Select Member --</option>
+                                @if (Model.Members is not null)
+                                {
+                                    @foreach (var member in Model.Members)
+                                    {
+                                        <option value="@member.Id">@member.Name</option>
+                                    }
+                                }
+
+                            </select> *@
+                            <select asp-for="memberId" class="form-select pt-1">
+                                <option value="">-- Select Member --</option>
+                                @foreach (var member in Model.Members)
+                                {
+                                    <option value="@member.Id">@member.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="memberId" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-save"></i> Create Booking
+                            </button>
+
+                            <a asp-action="GetMembersForOngoingSessions" asp-route-sessionId="@Model.sessionId" class="btn btn-primary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+@* <script>
+    $(document).ready(function() {
+        $('#MemberId').select2({
+            placeholder: "Select a member",
+            allowClear: true,
+            width: '100%'
+        });
+    });
+</script> *@
